@@ -134,7 +134,7 @@ if __name__ == "__main__":
         examples = clean_examples(examples, max_sequence_length)
         
         # save data
-        path_to_save = "./data/SemEval/TaskA/{1}.pkl".format(split)
+        path_to_save = "./data/SemEval/TaskA/{0}.pkl".format(split)
         print("Saving data to {0}".format(path_to_save))
         with open(path_to_save, "wb") as f:
             pickle.dump(examples, f)

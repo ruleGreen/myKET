@@ -33,9 +33,9 @@ if __name__ == "__main__":
     n = args.n
     
     print("Loading dataset...")
-    train = load_pickle("./data/{0}/{1}.pkl".format(dataset, "train"))
-    val = load_pickle("./data/{0}/{1}.pkl".format(dataset, "val"))
-    test = load_pickle("./data/{0}/{1}.pkl".format(dataset, "test"))
+    train = load_pickle("./data/SemEval/Task{0}/{1}.pkl".format(dataset, "train"))
+    val = load_pickle("./data/SemEval/Task{0}/{1}.pkl".format(dataset, "val"))
+    test = load_pickle("./data/SemEval/Task{0}/{1}.pkl".format(dataset, "test"))
 
     ngrams = get_all_ngrams(train+val+test, n)
 

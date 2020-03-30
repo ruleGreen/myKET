@@ -94,9 +94,9 @@ if __name__ == "__main__":
 
     # load examples
     logging.info("Loading data...")
-    if dataset == "SemEval_A":
-        train = load_pickle("./data/SemEval/TaskA/train.pkl")
-        val = load_pickle("./data/SemEval/TaskA/val.pkl")
+    if dataset == "A":
+        train = load_pickle("./data/SemEval/Task{0}/train.pkl".format(dataset))
+        val = load_pickle("./data/SemEval/Task{0}/val.pkl".format(dataset))
 
     if test_mode:
         test = load_pickle("./data/SemEval/TaskA/test.pkl")

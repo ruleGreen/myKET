@@ -26,7 +26,7 @@ logging.basicConfig(level = logging.INFO, \
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Model for Context-based Emotion Classification in Conversations")
+    parser = argparse.ArgumentParser(description="Model for Context-based CommonSense Classification in Conversations")
     parser.add_argument('--dataset', type=str, required=True)
     parser.add_argument('--min_freq', type=int, default=1)
     parser.add_argument('--max_vocab_size', type=int, default=1e9)
@@ -94,10 +94,12 @@ if __name__ == "__main__":
 
     # load examples
     logging.info("Loading data...")
-    train = load_pickle("./data/{0}/train.pkl".format(dataset))
-    val = load_pickle("./data/{0}/val.pkl".format(dataset))
+    if dataset == "SemEval_A":
+        train = load_pickle("./data/SemEval/TaskA/train.pkl")
+        val = load_pickle("./data/SemEval/TaskA/val.pkl")
+
     if test_mode:
-        test = load_pickle("./data/{0}/test.pkl".format(dataset))
+        test = load_pickle("./data/SemEval/TaskA/test.pkl")
         train = merge_splits(train, val)
         val = test
     logging.info("Number of training examples: {0}".format(len(train)))
@@ -227,6 +229,7 @@ if __name__ == "__main__":
             batch.to(device)
             out = model.forward(batch.src, batch.tgt, 
                                 batch.src_mask, batch.tgt_mask)
+            print("output of model", out)
             loss = loss_compute(out, batch.tgt_y, batch.ntokens)
             train_epoch_loss.append((loss/batch.ntokens).item())
         logging.info("-"*80)

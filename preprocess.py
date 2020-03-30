@@ -12,56 +12,25 @@ from utils.tools import counter_to_distribution
 spacy_en = spacy.load("en")
 
 
-def create_examples_EC(split):
+def create_examples_SemEval_A(split):
     """
         split: train, val or test
         return: a list of examples, each example is a list of utterances and an emotion label for the last utterance
     """
-    with open("./data/EC/{0}.txt".format(split), "r") as f:
-        f.readline()
-        conversations = f.readlines()
-    print("{0} split has {1} conversations".format(split, len(conversations)))
-    print("max_conv_length: ", 3)
-    
-    examples = []
-    dummy_emotion = conversations[0].strip().split("\t")[-1]
-    for conv in conversations:
-        utterances_emotion = [e.strip() for e in conv.split("\t")][1:]
-        ex = []
-        for idx, utter in enumerate(utterances_emotion[:-1]):
-            if idx%2 == 0:
-                speaker = "Speaker A"
-            else:
-                speaker = "Speaker B"
-            if idx <= 1:
-                ex.append((utter, speaker, dummy_emotion, 0))
-            elif idx == 2:
-                ex.append((utter, speaker, utterances_emotion[-1], 1))
-        examples.append(ex)
-    return examples
-
-
-def create_examples_DD(split):
-    """
-        split: train, val or test
-        return: a list of examples, each example is a list of utterances and an emotion label for the last utterance
-    """
-    with open("./data/DD/dialogues_{0}.txt".format(split), "r") as f:
-        conversations = f.readlines()
-    with open("./data/DD/dialogues_emotion_{0}.txt".format(split), "r") as f:
-        emotions = f.readlines()
-    print("{0} split has {1} conversations".format(split, len(conversations)))
-    
-    examples = []
-    max_conv_length = max([len(conv.split("__eou__")[:-1]) for conv in conversations])
-    print("max_conv_length: ", max_conv_length)
-    
-    dummy_utterance = "this is a dummy sentence"
-    dummy_emotion = emotions[0].strip().split(" ")[0]
-    dummy_speaker = "Speaker A"
-    for conv, emo in zip(conversations, emotions):
-        utterances = [utter.strip() for utter in conv.split("__eou__")][:-1]
+    df = pd.read_csv("./data/SemEval/TaskA/{0}.csv".format(split))
+    print("{0} split has {1} conversations".format(split, df["sent0"].unique().shape[0]))
         
+    dummy_utterance = "this is a dummy sentence"
+    has_target = False
+    examples = []
+    if 'label' in set(df.columns):
+        has_target = True
+    for _, row in df.iterrows():
+        sent0 = row['sent0']
+        sent1 = row['sent1']
+        label = row['label'] if has_target else None
+
+        utterances = [sent0, sent1]
         # add speaker info
         speakers = []
         for idx, utter in enumerate(utterances):
@@ -71,21 +40,28 @@ def create_examples_DD(split):
                 speaker = "Speaker B"
             speakers.append(speaker)
         
-        # add emotion
-        utter_emotions = [emotion.strip() for emotion in emo.split(" ")[:-1]]
-        assert len(utterances) == len(speakers) == len(utter_emotions)
+        # add labels
+        if has_target and label == 0:
+            utter_labels = [0, 1]
+        elif has_target and label == 1:
+            utter_labels = [1, 0]
+        elif not has_target:
+            utter_labels = None
+        assert len(utterances) == len(speakers) == len(utter_labels)
                 
         # pad dummy utterances
         conv_length = len(utterances)
+        max_conv_length = dummy_emotion = 2
+        dummy_speaker = "Speaker C"
         masks = conv_length*[1] + (max_conv_length-conv_length)*[0]
         utterances += (max_conv_length-conv_length)*[dummy_utterance]
-        utter_emotions += (max_conv_length-conv_length)*[dummy_emotion]
+        utter_labels += (max_conv_length-conv_length)*[dummy_emotion]
         speakers += (max_conv_length-conv_length)*[dummy_speaker]
-        
-        # create examples
-        examples.append(list(zip(utterances, speakers, utter_emotions, masks)))
-    return examples
 
+        # create examples
+        examples.append(list(zip(utterances, speakers, utter_labels, masks)))
+
+    return examples
 
 def create_examples_MELD(split):
     """
@@ -286,14 +262,15 @@ create_examples_dict = {
     "DD": create_examples_DD,
     "MELD": create_examples_MELD,
     "EmoryNLP": create_examples_EmoryNLP,
-    "IEMOCAP": create_examples_IEMOCAP
+    "IEMOCAP": create_examples_IEMOCAP,
+    'SemEval_A': create_examples_SemEval_A
 }
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Data preprocessing script")
-    parser.add_argument('--dataset', help='Dataset to preprocess', choices=['EC','DD','MELD', "EmoryNLP", "IEMOCAP"], required=True)
-    parser.add_argument('--max_conversation_length', type=int, default=10)
+    parser.add_argument('--dataset', help='Dataset to preprocess', choices=['SemEval_A', 'SemEval_B'], required=True)
+    parser.add_argument('--max_conversation_length', type=int, default=2)
     parser.add_argument('--max_sequence_length', type=int, default=30)
     
     # parse args
@@ -311,7 +288,7 @@ if __name__ == "__main__":
         examples = clean_examples(examples, max_sequence_length)
         
         # save data
-        path_to_save = "./data/{0}/{1}.pkl".format(dataset, split)
+        path_to_save = "./data/SemEval/TaskA/{1}.pkl".format(split)
         print("Saving data to {0}".format(path_to_save))
         with open(path_to_save, "wb") as f:
             pickle.dump(examples, f)

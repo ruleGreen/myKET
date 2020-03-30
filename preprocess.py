@@ -128,7 +128,7 @@ if __name__ == "__main__":
     # create examples
     print("Preprocessing {0}...".format(dataset))
     create_examples = create_examples_dict[dataset]
-    for split in ["train", "val", "test"]:
+    for split in ["train", "dev", "test"]:
         examples = create_examples(split)
         # examples = clip_conversation_length(examples, max_conversation_length)
         examples = clean_examples(examples, max_sequence_length)

@@ -46,7 +46,7 @@ def create_examples_SemEval_A(split):
         elif has_target and label == 1:
             utter_labels = [1, 0]
         elif not has_target:
-            utter_labels = None
+            utter_labels = [None, None]
         assert len(utterances) == len(speakers) == len(utter_labels)
                 
         # pad dummy utterances

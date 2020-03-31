@@ -97,7 +97,7 @@ class SimpleLossCompute:
             if test:
                 print(classification_report(val_y, pred_y, digits=4))
         elif dataset in ["A", "B"]:
-            print("pred_y: {0} val_y: {1}".format(pred_y, val_y))
+            print("pred_y: {0} val_y: {1}, len: {3}".format(pred_y, val_y, len(val_y)))
             score = accuracy_score(val_y, pred_y)
             print("Accuracy: {0}".format(score))
         else:

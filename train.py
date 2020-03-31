@@ -229,7 +229,6 @@ if __name__ == "__main__":
             batch.to(device)
             out = model.forward(batch.src, batch.tgt, 
                                 batch.src_mask, batch.tgt_mask)
-            print("output of model", out)
             loss = loss_compute(out, batch.tgt_y, batch.ntokens)
             train_epoch_loss.append((loss/batch.ntokens).item())
         logging.info("-"*80)

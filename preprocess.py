@@ -30,36 +30,11 @@ def create_examples_SemEval_A(split):
         sent1 = row['sent1']
         label = row['label'] if has_target else None
 
-        utterances = [sent0, sent1]
-        # add speaker info
-        speakers = []
-        for idx, utter in enumerate(utterances):
-            if idx%2 == 0:
-                speaker = "Speaker A"
-            else:
-                speaker = "Speaker B"
-            speakers.append(speaker)
-        
-        # add labels
-        if has_target and label == 0:
-            utter_labels = [0, 1]
-        elif has_target and label == 1:
-            utter_labels = [1, 0]
-        elif not has_target:
-            utter_labels = [None, None]
-        assert len(utterances) == len(speakers) == len(utter_labels)
-                
-        # pad dummy utterances
-        conv_length = len(utterances)
-        max_conv_length = dummy_emotion = 2
-        dummy_speaker = "Speaker C"
-        masks = conv_length*[1] + (max_conv_length-conv_length)*[0]
-        utterances += (max_conv_length-conv_length)*[dummy_utterance]
-        utter_labels += (max_conv_length-conv_length)*[dummy_emotion]
-        speakers += (max_conv_length-conv_length)*[dummy_speaker]
-
+        utterances = sent0 + ' ' + sent1     
+        mask = 1
         # create examples
-        examples.append(list(zip(utterances, speakers, utter_labels, masks)))
+        examples.append([(utterances, "Speaker A", label, mask)])
+
 
     return examples
 
@@ -109,13 +84,13 @@ def clean_examples(examples, max_sequence_length):
 
 
 create_examples_dict = {
-    'SemEval_A': create_examples_SemEval_A
+    'A': create_examples_SemEval_A
 }
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Data preprocessing script")
-    parser.add_argument('--dataset', help='Dataset to preprocess', choices=['SemEval_A', 'SemEval_B'], required=True)
+    parser.add_argument('--dataset', help='Dataset to preprocess', choices=['A', 'B'], required=True)
     parser.add_argument('--max_conversation_length', type=int, default=2)
     parser.add_argument('--max_sequence_length', type=int, default=30)
     

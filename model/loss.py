@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import numpy as np
-from sklearn.metrics import f1_score, mean_absolute_error, classification_report
+from sklearn.metrics import f1_score, mean_absolute_error, classification_report, accuracy_score
 
 from .constants import print_dims
 
@@ -96,6 +96,10 @@ class SimpleLossCompute:
             print("Weighted Macro-F1: {0}".format(score))
             if test:
                 print(classification_report(val_y, pred_y, digits=4))
+        elif dataset in ["A", "B"]:
+            print("pred_y: {0} val_y: {1}".format(pred_y, val_y))
+            score = accuracy_score(val_y, pred_y)
+            print("Accuracy: {0}".format(score))
         else:
             score = mean_absolute_error(val_y, pred_y)
             print("MAE: {0}".format(score))
